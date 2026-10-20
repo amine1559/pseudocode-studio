@@ -1,36 +1,86 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+﻿# PseudoCode Studio
 
-## Getting Started
+Éditeur et interpréteur de **pseudo-code algorithmique français**. L'application n'exécute pas JavaScript, Python, Java, C ni C++ : elle analyse et interprète uniquement le langage pédagogique défini ci-dessous.
 
-First, run the development server:
+## Installation
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Ouvrez [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm test          # tests unitaires (lexer, parser, interpréteur, exemples)
+npm run build     # compilation de production
+npm start         # serveur de production
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Aucun serveur d'exécution dédié n'est nécessaire : l'interpréteur tourne dans un Web Worker du navigateur.
 
-## Learn More
+## Architecture
 
-To learn more about Next.js, take a look at the following resources:
+```text
+Source
+  → Lexer
+  → Parseur (AST)
+  → Analyse sémantique
+  → Interpréteur (Web Worker)
+  → Console interactive
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Pas de `eval()`**, pas de `Function()`, pas de traduction vers JavaScript exécutable.
+- `Lire()` suspend l'interpréteur, affiche un champ dans la console, valide le type, puis reprend au même endroit.
+- Limites : nombre d'instructions, durée, profondeur de récursion, taille des tableaux, volume de sortie.
+- Arrêt immédiat : le Worker est terminé.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Les algorithmes sont stockés localement dans **IndexedDB** (création, enregistrement, renommage, duplication, suppression, import `.algo` / `.txt`, export).
 
-## Deploy on Vercel
+## Grammaire
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```text
+Algorithme Nom
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Variables
+    identifiant, identifiant : Type
+    T : Tableau[n] de Type
+
+Début
+    instructions
+Fin
+
+Fonction Nom(x : Type) : Type
+Variables
+    ...
+Début
+    Retourner expression
+FinFonction
+
+Procédure Nom(x : Type)
+Début
+    ...
+FinProcédure
+```
+
+Types : `Entier`, `Réel`, `Chaîne`, `Caractère`, `Booléen`, `Tableau[n] de Type`.
+
+Affectation : `x <- 10` ou `x ← 10`.
+
+Opérateurs : `+ - * / DIV MOD ^`, comparaisons `= <> < > <= >=`, logiques `ET OU NON`.
+
+Instructions : `Lire`, `Ecrire`, `Si / SinonSi / Sinon / FinSi`, `Pour / FinPour`, `TantQue / FinTantQue`, `Répéter / JusquA`.
+
+Les indices de tableaux commencent à **0**. Les commentaires sont `//` et `/* */`.
+
+Les mots-clés acceptent les variantes accentuées (`Début`, `Réel`, `Répéter`, `Jusqu'à`, `Procédure`, …).
+
+## Débogage
+
+- Points d'arrêt dans la marge de l'éditeur
+- Étape suivante, passer, continuer
+- Inspecteur de variables, pile d'appels, compteurs de boucles, historique
+
+## Licence pédagogique
+
+Projet éducatif local, sans compte utilisateur et sans base de données distante.
